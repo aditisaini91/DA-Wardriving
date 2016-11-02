@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">DA Wardriving</string>
+    <string name="action_exit">Exit</string>
+    <string name="startScanButton">Start</string>
+    <string name="stopScanButton">Store</string>
+    <string name="clearScanButton">Clear</string>
+    <string name="scanResults">Click Start to begin Wifi scans!</string>
+    <string name="usernameLabel">Username: </string>
+</resources>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>DAWardriving-CodeChef</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            position:absolute;
+            width:1100px;
+            height:600px;
+            z-index:15;
+            top:20%;
+            left:20%;
+            bottom:20%;
+            right:20%;
+            margin:-100px 0 0 -150px;
+            background: #38e1ff;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    var map;
+	// function initMap initiates map with sepecified center  
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: {lat: 49.8667, lng: 8.6500}
+        });
+	//calling loadDoc   
+     loadDoc();
+       }
+	//loadDoc function retrieves data from local DB and displays on map
+    function loadDoc() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                console.log(xhttp.responseText);
+         
+                var obj = JSON.parse(xhttp.responseText);
+                //console.log(obj.title);
+
+                var icon = 'blackPin.png';
+		var markers=[];
+		var contents = [];
+		var infowindows = [];
+
+        //addding markers to the map
+        for (i = 0; i < obj.markers.length; i++) {
+                 var lat = parseFloat(obj.markers[i].latitude);
+                 var lng = parseFloat(obj.markers[i].longitude);
+	       	 var capabilities = obj.markers[i].capabilities;
+		var ssid = obj.markers[i].SSID;
+	       	var bssid = obj.markers[i].BSSID;		
+                 var wpa_substring = "WPA";
+//                 var ess_substring = "ESS";
+		 var is_open = " ";
+                    if(capabilities.indexOf(wpa_substring) > -1){//black icon
+                         icon = 'red.png';
+			is_open = 'Protected';
+                    }
+                    else {
+                         icon = 'bluePin.png';
+			is_open = 'Open';
+                    }
+		//contents to be displayed in the infowindow, which displays when marker is clicked
+ 		contents[i] ='SSID : ' + ssid+ '<br>BSSID:'+bssid+'<br>Latitude: ' + lat + '<br>' + 'Longitude: ' + lng + '<br>' + 'Open/Protected: ' + is_open ;
+		//puts marker on map
+                markers[i] =  new google.maps.Marker({
+                     //   position: {lat: 49.8720, lng: 8.6515},
+                       position: {lat : lat, lng : lng},
+			 map: map,
+                        icon: icon
+                    });
+		markers[i].index = i; //add index property
+		//information window for each marker intialized
+                infowindows[i] = new google.maps.InfoWindow({
+                        content: contents[i],
+                        maxWidth: 200
+                    });
+		var prev_infowindow =false;//to ensure that only one marker exists in the map at once //
+		 google.maps.event.addListener(markers[i], 'click', function() {
+           		 if( prev_infowindow ) {
+          			 prev_infowindow.close();
+       			 }
+      			  prev_infowindow = infowindows[this.index];
+           		 infowindows[this.index].open(map,markers[this.index]);
+           		 map.panTo(markers[this.index].getPosition());
+   		 });
+                ////////
+                }
+            }
+        };
+        xhttp.open("GET", "getData.php", true);
+        xhttp.send();
+    }
+
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAORwvZUPUhRtlv7vb8vuQd37Qu8_5NoEc&zoom=15&signed_in=true&callback=initMap"></script>
+</body>
+</html>
+
